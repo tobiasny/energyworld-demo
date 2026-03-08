@@ -1,4 +1,4 @@
-# EnergyWord Demo
+# EnergyWorld Demo
 
 A demonstration project showcasing Claude Code's ability to rapidly build small MVP single-page applications.
 
@@ -7,7 +7,7 @@ Each customer gets an isolated app folder with everything needed to run locally 
 ## Project Structure
 
 ```
-energyword-demo/
+energyworld-demo/
 ├── README.md
 ├── CLAUDE.md              # Instructions for Claude Code
 ├── docs/
