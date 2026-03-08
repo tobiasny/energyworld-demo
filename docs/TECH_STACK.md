@@ -5,7 +5,7 @@
 ## Stack
 
 - **Framework**: Vite + React
-- **Styling**: Tailwind CSS + shadcn/ui
+- **Styling**: Tailwind CSS v4 + shadcn/ui v4
 - **Language**: TypeScript
 - **Package manager**: npm
 - **Build tool**: Vite
@@ -18,9 +18,15 @@
 
 ## shadcn/ui
 
-- Initialize with `npx shadcn@latest init` in each app folder
+- Initialize with `npx shadcn@latest init --defaults` in each app folder (see `APP_TEMPLATE.md` for prerequisites)
 - Add components as needed with `npx shadcn@latest add <component>`
 - shadcn components live in `src/components/ui/` (the default)
+
+### shadcn v4 Gotchas
+
+- **No `asChild` prop**: shadcn v4 Button (and other components) no longer support the `asChild` prop from Radix. Use `onClick` with `useNavigate()` instead of wrapping a `<Link>` with `asChild`.
+- **Tailwind v4 CSS config**: shadcn v4 generates CSS-based theme configuration inside `src/index.css` using `@theme inline`. There is no `tailwind.config.ts` file.
+- **Default font is Geist**: After init, replace with Inter (see `APP_TEMPLATE.md`).
 
 ## Approved Libraries
 
@@ -29,10 +35,11 @@
 | Icons          | `lucide-react`                   | Only icon library. No Font Awesome, etc. |
 | Dates          | `date-fns`                       | Lightweight, tree-shakeable              |
 | Forms          | `react-hook-form` + `zod`        | Zod for schema validation                |
-| Routing        | `react-router-dom`               | Only if 3+ views; skip for single-view   |
+| Routing        | `react-router-dom`               | Only if 2+ views; skip for single-view   |
 | State          | `zustand`                        | For shared/global state (see below)      |
 | Toasts         | `sonner`                         | For success/info feedback                |
 | Charts         | `recharts`                       | When data visualization is needed        |
+| Maps           | `react-leaflet` + `leaflet`      | Also install `@types/leaflet` as dev dep |
 | Font           | `@fontsource/inter`              | See `docs/DESIGN_SYSTEM.md`              |
 
 ## State Management
@@ -57,6 +64,29 @@ export const useAppStore = create<AppState>((set) => ({
   removeItem: (id) =>
     set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
 }));
+```
+
+### Zustand Pitfall: Derived Data in Selectors
+
+**Never** return derived/filtered arrays directly from Zustand store methods used as selectors. This creates a new array reference on every render, causing infinite re-render loops (especially with Recharts).
+
+**Bad** — causes infinite re-renders:
+```ts
+// In store
+getFilteredItems: (type) => get().items.filter(i => i.type === type)
+
+// In component — new array every render = infinite loop
+const items = useAppStore((s) => s.getFilteredItems("foo"));
+```
+
+**Good** — use `useMemo` in the component:
+```ts
+// In component
+const allItems = useAppStore((s) => s.items);
+const items = useMemo(
+  () => allItems.filter(i => i.type === "foo"),
+  [allItems]
+);
 ```
 
 ## Code Conventions
