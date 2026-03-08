@@ -27,6 +27,7 @@
 - **No `asChild` prop**: shadcn v4 Button (and other components) no longer support the `asChild` prop from Radix. Use `onClick` with `useNavigate()` instead of wrapping a `<Link>` with `asChild`.
 - **Tailwind v4 CSS config**: shadcn v4 generates CSS-based theme configuration inside `src/index.css` using `@theme inline`. There is no `tailwind.config.ts` file.
 - **Default font is Geist**: After init, replace with Inter (see `APP_TEMPLATE.md`).
+- **Slider `onValueChange` type**: The Slider component's `onValueChange` callback receives `number | readonly number[]`, not `number[]`. Destructuring like `([v])` will fail TypeScript. Use: `onValueChange={(v) => setValue(Array.isArray(v) ? v[0] : v)}`.
 
 ## Approved Libraries
 

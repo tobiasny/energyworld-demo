@@ -8,8 +8,11 @@
 cd apps/
 npm create vite@latest <customer-name> -- --template react-ts
 cd <customer-name>
+rm -rf .git           # Remove nested git repo created by Vite (prevents submodule issues)
 npm install
 ```
+
+> **Important**: Always remove the `.git` directory that Vite creates inside the app folder. If left in place, git will treat the app as a submodule and none of the app files will be committed to the parent repo.
 
 ### Install Tailwind CSS v4
 
@@ -88,6 +91,16 @@ shadcn v4 defaults to the Geist font. Replace it with Inter per the design syste
    ```css
    --font-sans: 'Inter', system-ui, sans-serif;
    ```
+
+### Post-init: Set up dark mode and page title
+
+Update `index.html` to enable dark mode by default and set the app title:
+
+```html
+<html lang="en" class="dark">
+  ...
+  <title><Customer Name></title>
+```
 
 ### Post-init: Clean up Vite boilerplate
 

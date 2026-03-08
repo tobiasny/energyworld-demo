@@ -20,6 +20,25 @@ This project demonstrates Claude Code building small MVP single-page application
 - When asked to modify an existing app, read its README.md and source first.
 - Always ensure `npm run dev` works locally and `npm run build` produces deployable static output.
 
+## Customer App Registry
+
+Each customer has exactly one app folder. When a customer asks for changes, **always work in their existing folder** — never create a second app for the same customer.
+
+| Customer        | App Folder              | Azure SWA URL                                              |
+|-----------------|-------------------------|------------------------------------------------------------|
+| NCS Overview    | `apps/ncs-overview/`    | https://zealous-mushroom-0e548741e.1.azurestaticapps.net   |
+| Software Saver  | `apps/software-saver/`  | https://polite-meadow-061a5b91e.6.azurestaticapps.net      |
+
+When a returning customer requests changes:
+
+1. Identify their app from the registry above
+2. `cd` into their app folder (e.g. `cd apps/ncs-overview`)
+3. Read their `README.md` and `INTERVIEW.md` for context
+4. Make changes, run `npm run build` to verify
+5. Deploy using the steps in `docs/DEPLOYMENT.md`
+
+> **Important**: Always verify you are in the correct app directory before making changes or running commands. Running `npm run dev` or `npm run build` from the wrong folder will affect the wrong app.
+
 ## Design & Quality
 
 - **Visual design**: Follow `docs/DESIGN_SYSTEM.md` for colors, typography, spacing, and shadcn/ui config.

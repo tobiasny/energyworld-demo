@@ -1,10 +1,41 @@
 # Deployment
 
-> Guide for deploying customer apps as static web apps.
+> Guide for deploying customer apps as Azure Static Web Apps — fully non-interactive.
 
-## Build
+## Prerequisites
 
-From any customer app folder:
+Two CLIs must be installed globally:
+
+- **Azure CLI** (`az`): `brew install azure-cli`
+- **SWA CLI** (`swa`): `sudo npm install -g @azure/static-web-apps-cli`
+
+The user must be logged in via `az login` before deploying.
+
+> **Note**: The `az` binary may not be on the default PATH in non-interactive shells. Use the full path `/opt/homebrew/bin/az` if `az` is not found.
+
+## Azure Configuration
+
+```
+Subscription:    Microsoft Partner Network (ecdaba29-609e-4dd1-84f7-ec7c2deec4b0)
+Resource group:  energyworld-demo
+Location:        westus2
+SKU:             Free
+```
+
+## Naming Convention
+
+Each app has exactly **one** Azure Static Web App instance. The Azure app name **must** match the folder name:
+
+```
+App folder:  apps/acme-corp/
+Azure name:  acme-corp
+```
+
+## Deploy Steps (Non-Interactive)
+
+All commands below are non-interactive and safe to run from Claude Code.
+
+### 1. Build
 
 ```bash
 cd apps/<customer-name>
@@ -12,74 +43,73 @@ npm install
 npm run build
 ```
 
-This produces a `dist/` folder with static HTML/CSS/JS ready for deployment.
-
-## Azure Static Web Apps (Standard)
-
-All apps deploy to **Azure Static Web Apps** using manual CLI deploys.
-
-### Install the CLI
+### 2. Check if the SWA resource already exists
 
 ```bash
-npm install -g @azure/static-web-apps-cli
+/opt/homebrew/bin/az staticwebapp show \
+  --name <customer-name> \
+  --resource-group energyworld-demo 2>&1
 ```
 
-### Local Preview
-
-Preview the production build locally before deploying:
+If the resource does **not** exist, create it:
 
 ```bash
-swa start dist/
+/opt/homebrew/bin/az staticwebapp create \
+  --name <customer-name> \
+  --resource-group energyworld-demo \
+  --location westus2 \
+  --sku Free
 ```
 
-### Resource Group
-
-All customer apps deploy into the same Azure resource group:
-
-```
-Resource group:  energyworld-demo
-```
-
-Use `--resource-group energyworld-demo` on every deploy command.
-
-### Naming Convention
-
-Each app has exactly **one** Azure Static Web App instance. The Azure app name **must** match the folder name:
-
-```
-App folder:  apps/acme-corp/
-Azure name:  acme-corp
-Resource group: energyworld-demo
-```
-
-This ensures redeployments update the existing instance rather than creating duplicates.
-
-### Deploy
-
-Always use the `--app-name` flag with the canonical name:
+### 3. Get the deployment token
 
 ```bash
-cd apps/<customer-name>
-npm run build
-swa deploy dist/ --app-name <customer-name> --resource-group energyworld-demo
+DEPLOY_TOKEN=$(/opt/homebrew/bin/az staticwebapp secrets list \
+  --name <customer-name> \
+  --resource-group energyworld-demo \
+  --query "properties.apiKey" -o tsv)
 ```
 
-**Important**: Always include both `--app-name` and `--resource-group`. Omitting them may create a new instance or deploy to the wrong resource group.
-
-### Redeployment
-
-Redeploying is identical to the initial deploy — same command, same flags. The CLI updates the existing instance in place:
+### 4. Deploy with the token
 
 ```bash
-cd apps/<customer-name>
-npm run build
-swa deploy dist/ --app-name <customer-name> --resource-group energyworld-demo
+swa deploy dist/ --deployment-token "$DEPLOY_TOKEN" --env production
 ```
 
-### Notes
+This skips all interactive prompts (login, project creation, naming).
+
+### Combined one-liner
+
+For convenience, steps 3–4 as a single command:
+
+```bash
+swa deploy dist/ \
+  --deployment-token "$(/opt/homebrew/bin/az staticwebapp secrets list \
+    --name <customer-name> \
+    --resource-group energyworld-demo \
+    --query 'properties.apiKey' -o tsv)" \
+  --env production
+```
+
+## Redeployment
+
+Redeploying is identical — same commands. The token remains valid, and the deploy updates the existing instance in place.
+
+## Deployed App URL
+
+After deployment, the app URL can be found with:
+
+```bash
+/opt/homebrew/bin/az staticwebapp show \
+  --name <customer-name> \
+  --resource-group energyworld-demo \
+  --query "defaultHostname" -o tsv
+```
+
+## Notes
 
 - **One instance per app** — never create multiple Azure SWA instances for the same customer app
-- **Naming is the folder name** — `--app-name` always equals the `apps/` subdirectory name
-- Manual deploys only — no CI/CD pipelines
-- Each app deploys independently — there is no monorepo build step
+- **Token-based deploy** — always use `--deployment-token` to avoid interactive prompts
+- **No CI/CD** — manual deploys only
+- Each app deploys independently
 - Ensure `npm run build` succeeds before deploying
