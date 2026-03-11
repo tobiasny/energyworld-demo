@@ -23,7 +23,7 @@ export function FieldMap() {
       <MapContainer
         center={[62, 4]}
         zoom={5}
-        className="h-full w-full rounded-lg [&_.leaflet-tile-pane]:grayscale [&_.leaflet-tile-pane]:invert [&_.leaflet-tile-pane]:brightness-[0.6] [&_.leaflet-tile-pane]:contrast-[3]"
+        className="h-full w-full [&_.leaflet-tile-pane]:grayscale [&_.leaflet-tile-pane]:invert [&_.leaflet-tile-pane]:brightness-[0.6] [&_.leaflet-tile-pane]:contrast-[3]"
         style={{ minHeight: "400px" }}
       >
         <TileLayer

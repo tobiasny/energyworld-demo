@@ -35,7 +35,7 @@ export function MapKPIs({ hoveredField }: Props) {
   const year = fieldStats ? fieldStats.year : totals.latestYear;
 
   return (
-    <div className="absolute top-4 left-14 z-[1000] flex gap-3">
+    <div className="absolute top-20 left-14 z-[1000] flex gap-3">
       <div className="bg-card/90 backdrop-blur border rounded-lg px-4 py-3 shadow-md">
         <p className="text-xs text-muted-foreground">{label}</p>
         <p className="text-xl font-bold">{oil.toFixed(1)} <span className="text-sm font-normal text-muted-foreground">MSm3 oil</span></p>
